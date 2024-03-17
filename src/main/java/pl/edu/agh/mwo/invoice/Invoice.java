@@ -3,11 +3,24 @@ package pl.edu.agh.mwo.invoice;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import pl.edu.agh.mwo.invoice.product.Product;
 
 public class Invoice {
+
+    public static int lastNumber = 0;
+
+    private final int invoiceNumber;
+
     private Map<Product, Integer> products = new HashMap<Product, Integer>();
+
+    public Invoice(){
+        this.invoiceNumber = ++lastNumber;
+    }
+    public int getNumber(){
+        return invoiceNumber;
+    }
 
     public void addProduct(Product product) {
         addProduct(product, 1);
@@ -40,5 +53,17 @@ public class Invoice {
             totalGross = totalGross.add(product.getPriceWithTax().multiply(quantity));
         }
         return totalGross;
+    }
+
+    public void printInvoice() {
+        System.out.println("Invocie Number: " + invoiceNumber);
+
+        for (Map.Entry<Product, Integer> product : products.entrySet()) {
+            Product productInf = product.getKey();
+            System.out.println(productInf.getName() + " " + product.getValue() + " " + productInf.getPrice());
+        }
+
+        System.out.println("Number of positions: ");
+
     }
 }
