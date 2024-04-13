@@ -1,21 +1,45 @@
 package pl.edu.agh.mwo.invoice;
 
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.mockito.*;
 import pl.edu.agh.mwo.invoice.Invoice;
-import pl.edu.agh.mwo.invoice.product.DairyProduct;
-import pl.edu.agh.mwo.invoice.product.OtherProduct;
-import pl.edu.agh.mwo.invoice.product.Product;
-import pl.edu.agh.mwo.invoice.product.TaxFreeProduct;
+import pl.edu.agh.mwo.invoice.product.*;
+
+import static org.mockito.Mockito.doReturn;
+
 
 public class InvoiceTest {
+
     private Invoice invoice;
 
+    private final static LocalDate LOCAL_DATE = LocalDate.of(LocalDate.now().getYear(), 03, 05);
+
+    @InjectMocks
+    private FuelCanister fuelCanisterOnMotherInLawDay = new FuelCanister("95", new BigDecimal("10"));
+
+    @Mock
+    private Clock clock;
+
+    private Clock fixedClock;
+
+    @Before
+    public void initMocks() {
+        MockitoAnnotations.initMocks(this);
+
+        fixedClock = Clock.fixed(LOCAL_DATE.atStartOfDay(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
+        doReturn(fixedClock.instant()).when(clock).instant();
+        doReturn(fixedClock.getZone()).when(clock).getZone();
+    }
     @Before
     public void createEmptyInvoiceForTheTest() {
         invoice = new Invoice();
@@ -142,5 +166,48 @@ public class InvoiceTest {
         int n1 = new Invoice().getNumber();
         int n2 = new Invoice().getNumber();
         Assert.assertThat(n2, Matchers.greaterThan(n1));
+    }
+
+    @Test
+    public void testAddingDuplicate(){
+        Invoice invoice = new Invoice();
+        Product product = new OtherProduct("testProduct", new BigDecimal("10"));
+
+        invoice.addProduct(product);
+        invoice.addProduct(product, 2);
+        invoice.addProduct(product, 3);
+
+        Assert.assertEquals(6, (int) invoice.getProducts().get(product));
+        Assert.assertEquals(new BigDecimal("60"), invoice.getNetTotal());
+    }
+
+    @Test
+    public void testCheckBottleOfWinePrice(){
+        Invoice invoice = new Invoice();
+        Product wine = new BottleOfWine("red", new BigDecimal("10"));
+        invoice.addProduct(wine);
+
+        BigDecimal correctPrice = new BigDecimal("15.56").multiply(new BigDecimal("0.23")).add(new BigDecimal("15.56"));
+
+        Assert.assertEquals(correctPrice, invoice.getGrossTotal());
+    }
+
+    @Test
+    public void testFuelPriceOnMotherInLawDay(){
+        Invoice invoice = new Invoice();
+        invoice.addProduct(fuelCanisterOnMotherInLawDay);
+        BigDecimal correctPrice = new BigDecimal("12.30");
+
+        Assert.assertEquals(correctPrice, invoice.getGrossTotal());
+    }
+
+    @Test
+    public void testFuelPriceOnNormalDay(){
+        Invoice invoice = new Invoice();
+        FuelCanister fuel = new FuelCanister("95", new BigDecimal("10"));
+        invoice.addProduct(fuel);
+        BigDecimal correctPrice = new BigDecimal("15.56").multiply(new BigDecimal("0.23")).add(new BigDecimal("15.56"));
+
+        Assert.assertEquals(correctPrice, invoice.getGrossTotal());
     }
 }

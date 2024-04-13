@@ -40,6 +40,10 @@ public class Invoice {
         }
     }
 
+    public Map<Product, Integer> getProducts(){
+        return products;
+    }
+
     public BigDecimal getNetTotal() {
         BigDecimal totalNet = BigDecimal.ZERO;
         for (Product product : products.keySet()) {
