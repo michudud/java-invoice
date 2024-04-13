@@ -15,15 +15,18 @@ public class Invoice {
 
     private Map<Product, Integer> products = new HashMap<Product, Integer>();
 
-    public Invoice(){
+    public Invoice() {
         this.invoiceNumber = ++lastNumber;
     }
-    public int getNumber(){
+
+    public int getNumber() {
         return invoiceNumber;
     }
 
     public void addProduct(Product product) {
-        if(product == null) throw new IllegalArgumentException();
+        if (product == null) {
+            throw new IllegalArgumentException();
+        }
         if (!products.containsKey(product)) {
             products.put(product, 1);
         } else {
@@ -32,15 +35,17 @@ public class Invoice {
     }
 
     public void addProduct(Product product, Integer quantity) {
-        if(quantity <= 0 || product == null) throw new IllegalArgumentException();
-        if(!products.containsKey(product)) {
+        if (quantity <= 0 || product == null) {
+            throw new IllegalArgumentException();
+        }
+        if (!products.containsKey(product)) {
             products.put(product, quantity);
-        }else{
-            products.put(product,products.get(product)+quantity);
+        } else {
+            products.put(product, products.get(product) + quantity);
         }
     }
 
-    public Map<Product, Integer> getProducts(){
+    public Map<Product, Integer> getProducts() {
         return products;
     }
 
@@ -73,7 +78,8 @@ public class Invoice {
         for (Map.Entry<Product, Integer> product : products.entrySet()) {
             numberOfproducts += product.getValue();
             Product productInf = product.getKey();
-            System.out.println(productInf.getName() + " " + product.getValue() + " " + productInf.getPrice());
+            System.out.println(productInf.getName() + " "
+                    + product.getValue() + " " + productInf.getPrice());
         }
 
         System.out.println("Number of positions: " + products.size());
