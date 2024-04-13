@@ -23,14 +23,21 @@ public class Invoice {
     }
 
     public void addProduct(Product product) {
-        addProduct(product, 1);
+        if(product == null) throw new IllegalArgumentException();
+        if (!products.containsKey(product)) {
+            products.put(product, 1);
+        } else {
+            products.put(product, products.get(product) + 1);
+        }
     }
 
     public void addProduct(Product product, Integer quantity) {
-        if (product == null || quantity <= 0) {
-            throw new IllegalArgumentException();
+        if(quantity <= 0 || product == null) throw new IllegalArgumentException();
+        if(!products.containsKey(product)) {
+            products.put(product, quantity);
+        }else{
+            products.put(product,products.get(product)+quantity);
         }
-        products.put(product, quantity);
     }
 
     public BigDecimal getNetTotal() {
@@ -56,14 +63,16 @@ public class Invoice {
     }
 
     public void printInvoice() {
+        int numberOfproducts = 0;
         System.out.println("Invocie Number: " + invoiceNumber);
 
         for (Map.Entry<Product, Integer> product : products.entrySet()) {
+            numberOfproducts += product.getValue();
             Product productInf = product.getKey();
             System.out.println(productInf.getName() + " " + product.getValue() + " " + productInf.getPrice());
         }
 
-        System.out.println("Number of positions: ");
-
+        System.out.println("Number of positions: " + products.size());
+        System.out.println("Number of products: " + numberOfproducts);
     }
 }
